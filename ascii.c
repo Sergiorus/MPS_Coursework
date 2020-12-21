@@ -9,7 +9,7 @@ ascii_is_digit(byte_t b)
 }
 
 int
-ascii_to_byte(byte_t b, byte_t *dest)
+ascii_byte_to_digit(byte_t b, byte_t *dest)
 {
 	assert(dest);
 

@@ -4,7 +4,7 @@
 
 ## General Flags
 PROJECT = MPS_Coursework
-MCU = atmega128
+MCU = atmega8535
 TARGET = MPS_Coursework.elf
 CC = avr-gcc
 

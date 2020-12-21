@@ -18,8 +18,8 @@ adc_init()
 {
 	assert(!adc_initialized);
 
-	ADMUX = (0<<REFS1)|(1<<REFS0)|(1<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(0<<MUX1)|(0<<MUX0);
-	ADCSRA = (1<<ADEN)|(0<<ADSC)|(0<<ADATE)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
+	ADMUX = (1<<REFS0)|(1<<ADLAR);
+	ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
 
 	adc_initialized = true;
 }
@@ -45,14 +45,11 @@ adc_set_intr_handler(adc_intr_handler_t handler, void *args)
 	sei();
 }
 
-byte_t b
+byte_t
 adc_read_byte()
 {
-	struct adc_props adc_props;
-	adc_props.time = time;
-
 	ADMUX = PIN_ADC0;
-	start_conv_adc();
+	adc_start_conv();
 
 	while (adc_conv_in_progress());
 

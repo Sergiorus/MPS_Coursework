@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include "byte.h"
 #include "uart.h"
@@ -30,6 +31,9 @@ eintr_init(void)
 
 	// Enable INT1
 	bit_set(GICR, INT1);
+	// Interrupt by falling edge
+	bit_set(MCUCR, ISC11);
+	bit_clr(MCUCR, ISC10);
 	// Set button port to input
 	bit_clr(EINTR_BTN_DIR, EINTR_BTN);
 	// Enable pull up
@@ -51,6 +55,7 @@ eintr_init(void)
 	bit_set(EINTR_CMP_PORT, EINTR_CMP_POS);
 	bit_set(EINTR_CMP_PORT, EINTR_CMP_NEG);
 
+	sleep_enable();
 	// Set sleep mode to power save
 	bit_clr(MCUCR, SM2);
 	bit_set(MCUCR, SM1);
@@ -61,19 +66,21 @@ eintr_init(void)
 }
 
 static eintr_handler_t operators_pult_handler = NULL;
+static void *operators_pult_handler_args = NULL;
 
 ISR(INT1_vect)
 {
 	if (operators_pult_handler) {
-		operators_pult_handler();
+		operators_pult_handler(operators_pult_handler_args);
 	}
 }
 
 void
-eintr_set_operators_pult_handler(eintr_handler_t handler)
+eintr_set_operators_pult_handler(eintr_handler_t handler, void *args)
 {
 	cli();
 	operators_pult_handler = handler;
+	operators_pult_handler_args = args;
 	sei();
 }
 
@@ -89,6 +96,6 @@ ISR(ANA_COMP_vect)
 
 	// TODO выключить индикатор готовности устройства
 
-	_SLEEP();
+	sleep_cpu();
 }
 

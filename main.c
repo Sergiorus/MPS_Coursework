@@ -31,6 +31,24 @@
 #define NV()	(KV2 * N2 - KV1 * N1)
 #define S()	((x1 ^ x2) && (x3 ^ x4))
 
+struct operators_pult_handler_args {
+	bool x1;
+	bool x2;
+	bool x3;
+	bool x4;
+	bool f;
+	bool S;
+};
+
+void
+operators_pult_handler(void *raw_args)
+{
+	struct operators_pult_handler_args *args =
+		(struct operators_pult_handler_args *) raw_args;
+
+	//TODO print x1, x2, x3, x4, f_val, S_val
+}
+
 int
 main(void)
 {
@@ -48,8 +66,8 @@ main(void)
 		N2 = uart_must_read_byte();
 	} while (!ascii_is_digit(N1) || !ascii_is_digit(N2));
 
-	assert(ascii_byte_to_digit(N1, &N1));
-	assert(ascii_byte_to_digit(N2, &N2));
+	ascii_byte_to_digit(N1, &N1);
+	ascii_byte_to_digit(N2, &N2);
 
 	bool x1 = false;
 	bool x2 = false;
@@ -59,16 +77,17 @@ main(void)
 	byte_t KV1 = 0;
 	byte_t KV2 = 0;
 
-	static
-	void
-	operators_pult_handler(void)
-	{
-		bool f_val = f();
-		bool S_val = S();
-		//TODO print x1, x2, x3, x4, f_val, S_val
-	}
+	struct operators_pult_handler_args operators_pult_handler_args = {
+		x1,
+		x2,
+		x3,
+		x4,
+		f(),
+		S(),
+	};
 
-	eintr_set_operators_pult_handler(operators_pult_handler);
+	eintr_set_operators_pult_handler(operators_pult_handler,
+			&operators_pult_handler_args);
 
 	for(;;) {
 		//TODO read X's and V's
