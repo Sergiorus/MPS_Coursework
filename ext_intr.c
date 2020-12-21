@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
+#include <util/delay.h>
 
 #include "byte.h"
 #include "uart.h"
@@ -32,7 +33,7 @@ eintr_init(void)
 	// Enable INT1
 	bit_set(GICR, INT1);
 	// Interrupt by falling edge
-	bit_set(MCUCR, ISC11);
+	bit_set(MCUCR, ISC01);
 	bit_clr(MCUCR, ISC10);
 	// Set button port to input
 	bit_clr(EINTR_BTN_DIR, EINTR_BTN);
@@ -94,6 +95,7 @@ ISR(ANA_COMP_vect)
 	uart_write_byte('R');
 	uart_write_byte('M');
 
+	_delay_ms(1);
 	// TODO выключить индикатор готовности устройства
 
 	sleep_cpu();
