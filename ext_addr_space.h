@@ -2,6 +2,7 @@
 #define EXT_ADDR_SPACE_H_ 1
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "byte.h"
 
@@ -18,6 +19,12 @@ void
 eas_init(void);
 
 bool
-eas_read_bit(byte_t addr);
+eas_read_bit(uint16_t addr);
+
+void
+eas_write_bit(uint16_t addr, bool bit);
+
+byte_t
+eas_read_analog(uint16_t addr);
 
 #endif

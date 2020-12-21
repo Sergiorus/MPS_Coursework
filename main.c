@@ -10,6 +10,7 @@
 #include "ascii.h"
 #include "byte.h"
 #include "ext_intr.h"
+#include "ext_addr_space.h"
 #include "uart.h"
 
 #define ADDR_X1		0x0000
@@ -56,6 +57,7 @@ main(void)
 	uart_init(F_CPU, BAUD_RATE);
 	adc_init();
 	eintr_init();
+	eas_init();
 	sei(); // Enable global interrupts
 
 	byte_t N1 = 0;
