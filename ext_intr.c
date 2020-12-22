@@ -104,7 +104,7 @@ ISR(ANA_COMP_vect)
 	uart_write_byte('R');
 	uart_write_byte('M');
 
-	_delay_us(10);
+	_delay_ms(1);
 
 	eas_write_bit(EAS_ADDR_READY, false);
 	sleep_cpu();
