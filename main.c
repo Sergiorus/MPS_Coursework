@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 #include "adc.h"
 #include "ascii.h"
@@ -13,20 +14,8 @@
 #include "ext_addr_space.h"
 #include "uart.h"
 
-#define ADDR_X1		0x0000
-#define ADDR_X2		0x0001
-#define ADDR_X3		0x0002
-#define ADDR_X4		0x0003
-#define ADDR_V1		0x0004
-#define ADDR_V2		0x0005
-#define ADDR_LED1	0x0006
-#define ADDR_LED2	0x0007
-
-#define LED1_FLICKERING_T1_SEC	2
-#define LED1_FLICKERING_T2_SEC	4
-
-#define SIG_OUT_DURATION_T1_SEC	2
-#define SIG_OUT_DURATION_T2_SEC	4
+#define N1_validate()	(N1 >= 7 && N1 <= 9)
+#define N2_validate()	(N2 >= 10 && N2 <= 12)
 
 #define f()	(x1 && !x3 ^ (x2 || !x4))
 #define NV()	(KV2 * N2 - KV1 * N1)
@@ -47,7 +36,33 @@ operators_pult_handler(void *raw_args)
 	struct operators_pult_handler_args *args =
 		(struct operators_pult_handler_args *) raw_args;
 
-	//TODO print x1, x2, x3, x4, f_val, S_val
+	eas_write_bit(EAS_ADDR_LEDS0, args->x1);
+	eas_write_bit(EAS_ADDR_LEDS1, args->x2);
+	eas_write_bit(EAS_ADDR_LEDS2, args->x3);
+	eas_write_bit(EAS_ADDR_LEDS3, args->x4);
+	eas_write_bit(EAS_ADDR_LEDS4, args->f);
+	eas_write_bit(EAS_ADDR_LEDS5, args->S);
+}
+
+void
+read_N1_N2(byte_t *N1, byte_t *N2)
+{
+	byte_t b1 = 0;
+	byte_t b2 = 0;
+	byte_t b3 = 0;
+
+	do {
+		b1 = uart_must_read_byte();
+		b2 = uart_must_read_byte();
+		b3 = uart_must_read_byte();
+	} while (!ascii_is_digit(b1) || !ascii_is_digit(b2) || !ascii_is_digit(b3));
+
+	ascii_byte_to_digit(b1, &b1);
+	ascii_byte_to_digit(b2, &b2);
+	ascii_byte_to_digit(b3, &b3);
+
+	*N1 = b1;
+	*N2 = 10 * b2 + b3;
 }
 
 int
@@ -60,24 +75,25 @@ main(void)
 	eas_init();
 	sei(); // Enable global interrupts
 
+	eas_write_bit(EAS_ADDR_READY, true);
+
 	byte_t N1 = 0;
 	byte_t N2 = 0;
+	byte_t N3 = 0;
 
 	do {
-		N1 = uart_must_read_byte();
-		N2 = uart_must_read_byte();
-	} while (!ascii_is_digit(N1) || !ascii_is_digit(N2));
-
-	ascii_byte_to_digit(N1, &N1);
-	ascii_byte_to_digit(N2, &N2);
+		read_N1_N2(&N1, &N2);
+	} while (!N1_validate() || !N2_validate());
 
 	bool x1 = false;
 	bool x2 = false;
 	bool x3 = false;
 	bool x4 = false;
+	bool f_val = false;
 
 	byte_t KV1 = 0;
 	byte_t KV2 = 0;
+	byte_t NV_val = 0;
 
 	struct operators_pult_handler_args operators_pult_handler_args = {
 		x1,
@@ -92,11 +108,51 @@ main(void)
 			&operators_pult_handler_args);
 
 	for(;;) {
-		//TODO read X's and V's
-		//TODO count and store f
-		//TODO flickering if needed
-		//TODO count NV
-		//TODO make signal
+		x1 = !eas_read_bit(EAS_ADDR_X1);
+		x2 = !eas_read_bit(EAS_ADDR_X2);
+		x3 = !eas_read_bit(EAS_ADDR_X3);
+		x4 = !eas_read_bit(EAS_ADDR_X4);
+		f_val = f();
+
+		KV1 = eas_read_analog(EAS_ADDR_V1);
+		KV2 = eas_read_analog(EAS_ADDR_V2);
+		NV_val = NV();
+
+		bit_def(N3, 0, !eas_read_bit(EAS_ADDR_SW0));
+		bit_def(N3, 1, !eas_read_bit(EAS_ADDR_SW1));
+		bit_def(N3, 2, !eas_read_bit(EAS_ADDR_SW2));
+		bit_def(N3, 3, !eas_read_bit(EAS_ADDR_SW3));
+		bit_def(N3, 4, !eas_read_bit(EAS_ADDR_SW4));
+		bit_def(N3, 5, !eas_read_bit(EAS_ADDR_SW5));
+		bit_def(N3, 6, !eas_read_bit(EAS_ADDR_SW6));
+		bit_def(N3, 7, !eas_read_bit(EAS_ADDR_SW7));
+
+		if (f_val)
+			eas_write_bit(EAS_ADDR_LED1, true); // LED1 turn on
+		eas_write_bit(EAS_ADDR_LED2, true); // LED2 turn off
+
+		_delay_ms(2000);
+
+		if (f_val)
+			eas_write_bit(EAS_ADDR_LED1, false); // LED1 turn off
+		if (NV_val > N3)
+			eas_write_bit(EAS_ADDR_LED2, false); // LED2 turn off
+
+		_delay_ms(2000);
+
+		eas_write_bit(EAS_ADDR_LED2, false); // LED2 turn off
+
+		_delay_ms(2000);
+
+		if (f_val)
+			eas_write_bit(EAS_ADDR_LED1, true); // LED1 turn on
+
+		_delay_ms(2000);
+
+		if (f_val)
+			eas_write_bit(EAS_ADDR_LED1, false); // LED1 turn off
+
+		_delay_ms(4000);
 	}
 
 	return 0;

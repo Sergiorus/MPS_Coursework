@@ -7,6 +7,7 @@
 #include <util/delay.h>
 
 #include "byte.h"
+#include "ext_addr_space.h"
 #include "uart.h"
 
 #include "ext_intr.h"
@@ -57,10 +58,10 @@ eintr_init(void)
 	bit_set(EINTR_CMP_PORT, EINTR_CMP_NEG);
 
 	sleep_enable();
-	// Set sleep mode to power save
+	// Set sleep mode to Power-down
 	bit_clr(MCUCR, SM2);
 	bit_set(MCUCR, SM1);
-	bit_set(MCUCR, SM0);
+	bit_clr(MCUCR, SM0);
 
 	eintr_initialized = true;
 	sei();
@@ -71,8 +72,16 @@ static void *operators_pult_handler_args = NULL;
 
 ISR(INT1_vect)
 {
+	eas_write_bit(EAS_ADDR_READY, true);
+
 	if (operators_pult_handler) {
 		operators_pult_handler(operators_pult_handler_args);
+	}
+
+	if (!bit_get(ACSR, ACO)) {
+		// Back to sleep if power is still low
+		eas_write_bit(EAS_ADDR_READY, false);
+		sleep_cpu();
 	}
 }
 
@@ -95,9 +104,9 @@ ISR(ANA_COMP_vect)
 	uart_write_byte('R');
 	uart_write_byte('M');
 
-	_delay_ms(1);
-	// TODO выключить индикатор готовности устройства
+	_delay_us(10);
 
+	eas_write_bit(EAS_ADDR_READY, false);
 	sleep_cpu();
 }
 
