@@ -46,11 +46,11 @@ void
 eas_set_address(uint16_t addr)
 {
 	EAS_ADDR_PIN = byte_hi(addr);
-	bit_clr(EAS_PIN, EAS_AS);
+	bit_clr(EAS_PORT, EAS_AS);
 	_delay_ms(1);
 
 	EAS_ADDR_PIN = byte_lo(addr);
-	bit_set(EAS_PIN, EAS_AS);
+	bit_set(EAS_PORT, EAS_AS);
 	_delay_ms(1);
 }
 
@@ -64,8 +64,9 @@ eas_read_bit(uint16_t addr)
 void
 eas_write_bit(uint16_t addr, bool bit)
 {
+	bit_def(EAS_PORT, EAS_DOUT, bit);
 	eas_set_address(addr);
-	bit_def(EAS_PIN, EAS_DOUT, bit);
+	eas_set_address(0x000F);
 }
 
 byte_t
