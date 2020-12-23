@@ -7,7 +7,7 @@
 #include <util/delay.h>
 
 #include "byte.h"
-#include "ext_addr_space.h"
+#include "led.h"
 #include "uart.h"
 
 #include "ext_intr.h"
@@ -72,7 +72,7 @@ static void *operators_pult_handler_args = NULL;
 
 ISR(INT1_vect)
 {
-	eas_write_bit(EAS_ADDR_READY, true);
+	led_turn_on(LED_READY);
 
 	if (operators_pult_handler) {
 		operators_pult_handler(operators_pult_handler_args);
@@ -80,7 +80,7 @@ ISR(INT1_vect)
 
 	if (!bit_get(ACSR, ACO)) {
 		// Back to sleep if power is still low
-		eas_write_bit(EAS_ADDR_READY, false);
+		led_turn_off(LED_READY);
 		sleep_cpu();
 	}
 }
@@ -106,7 +106,8 @@ ISR(ANA_COMP_vect)
 
 	_delay_ms(10);
 
-	eas_write_bit(EAS_ADDR_READY, false);
+	led_turn_off(LED_READY);
+	led_flush();
 	sleep_cpu();
 }
 
