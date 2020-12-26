@@ -21,6 +21,18 @@
 #define NV()	(KV2 * N2 - KV1 * N1)
 #define S()	((x1 ^ x2) && (x3 ^ x4))
 
+#define oph_args_update()		\
+	({				\
+		cli();			\
+		oph_args.x1 = x1;	\
+		oph_args.x2 = x2;	\
+		oph_args.x3 = x3;	\
+		oph_args.x4 = x4;	\
+		oph_args.f  = f();	\
+		oph_args.S  = S();	\
+		sei();			\
+	})
+
 struct operators_pult_handler_args {
 	bool x1;
 	bool x2;
@@ -95,17 +107,10 @@ main(void)
 	byte_t KV2 = 0;
 	byte_t NV_val = 0;
 
-	struct operators_pult_handler_args operators_pult_handler_args = {
-		x1,
-		x2,
-		x3,
-		x4,
-		f(),
-		S(),
-	};
+	static struct operators_pult_handler_args oph_args = {};
+	oph_args_update();
 
-	eintr_set_operators_pult_handler(operators_pult_handler,
-			&operators_pult_handler_args);
+	eintr_set_operators_pult_handler(operators_pult_handler, &oph_args);
 
 	for(;;) {
 		// DEBUG: reading is in progress
@@ -129,6 +134,8 @@ main(void)
 		bit_def(N3, 5, !eas_read_bit(EAS_ADDR_SW5));
 		bit_def(N3, 6, !eas_read_bit(EAS_ADDR_SW6));
 		bit_def(N3, 7, !eas_read_bit(EAS_ADDR_SW7));
+
+		oph_args_update();
 
 		// DEBUG: reading finished
 		eas_write_bit(EAS_ADDR_DEBUG, false);
