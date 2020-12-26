@@ -27,9 +27,8 @@ eas_init(void)
 
 	// Set address port to output
 	EAS_ADDR_DIR = 0xFF;
-	// Set address select to output, set it to 1
+	// Set address select to output
 	bit_set(EAS_DIR, EAS_AS);
-	bit_set(EAS_PIN, EAS_AS);
 	// Set data out to output
 	bit_set(EAS_DIR, EAS_DOUT);
 
@@ -45,12 +44,12 @@ static
 void
 eas_set_address(uint16_t addr)
 {
-	EAS_ADDR_PIN = byte_hi(addr);
 	bit_clr(EAS_PORT, EAS_AS);
+	EAS_ADDR_PORT = byte_hi(addr);
 	_delay_ms(1);
 
-	EAS_ADDR_PIN = byte_lo(addr);
 	bit_set(EAS_PORT, EAS_AS);
+	EAS_ADDR_PORT = byte_lo(addr);
 	_delay_ms(1);
 }
 

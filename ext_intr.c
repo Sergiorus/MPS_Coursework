@@ -39,7 +39,7 @@ eintr_init(void)
 	// Set button port to input
 	bit_clr(EINTR_BTN_DIR, EINTR_BTN);
 	// Enable pull up
-	bit_set(EINTR_BTN_DIR, EINTR_BTN);
+	bit_set(EINTR_BTN_PORT, EINTR_BTN);
 
 	// Turn on analog comparator
 	bit_clr(ACSR, ACD);
