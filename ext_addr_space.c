@@ -31,7 +31,12 @@ eas_set_address(uint16_t addr)
 	_delay_ms(1);
 }
 
-#define eas_reset_address() ({eas_set_address(EAS_ADDR_UNDEF);})
+//TODO remove dirty hack
+#define eas_reset_address()				\
+	({						\
+		eas_set_address(EAS_ADDR_UNDEF);	\
+		eas_set_address(EAS_ADDR_UNDEF);	\
+	 })
 
 static bool eas_initialized = false;
 
