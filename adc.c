@@ -9,8 +9,6 @@
 #define adc_stop_conv()		({bit_clr(ADCSRA, ADSC);})
 #define adc_conv_in_progress()	({bit_get(ADCSRA, ADSC);})
 
-#define PIN_ADC0 0x60
-
 static bool adc_initialized = false;
 
 void
@@ -18,7 +16,7 @@ adc_init()
 {
 	assert(!adc_initialized);
 
-	ADMUX = (1<<REFS0)|(1<<ADLAR);
+	ADMUX = (1<<REFS0)|(1<<ADLAR)|(1<<MUX3)|(1<<MUX0);
 	ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
 
 	adc_initialized = true;
@@ -48,7 +46,6 @@ adc_set_intr_handler(adc_intr_handler_t handler, void *args)
 byte_t
 adc_read_byte()
 {
-	ADMUX = PIN_ADC0;
 	adc_start_conv();
 
 	while (adc_conv_in_progress());
