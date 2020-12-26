@@ -14,7 +14,8 @@
 #define EAS_PORT	PORTD		/* Register to enable pull up resistors / write data */
 #define EAS_DIR		DDRD		/* Register to specify port direction: read/write */
 #define EAS_PIN		PIND		/* Register to read data */
-#define EAS_AS		(byte_t)5	/* Address byte select (high or low) */
+#define EAS_AS_LO	(byte_t)4	/* Address byte select low */
+#define EAS_AS_HI	(byte_t)5	/* Address byte select high */
 #define EAS_DIN		(byte_t)6	/* Data in */
 #define EAS_DOUT	(byte_t)7	/* Data out */
 
@@ -22,21 +23,18 @@ static
 void
 eas_set_address(uint16_t addr)
 {
-	bit_clr(EAS_PORT, EAS_AS);
+	bit_set(EAS_PORT, EAS_AS_HI);
 	EAS_ADDR_PORT = byte_hi(addr);
+	bit_clr(EAS_PORT, EAS_AS_HI);
 	_delay_ms(1);
 
-	bit_set(EAS_PORT, EAS_AS);
+	bit_set(EAS_PORT, EAS_AS_LO);
 	EAS_ADDR_PORT = byte_lo(addr);
+	bit_clr(EAS_PORT, EAS_AS_LO);
 	_delay_ms(1);
 }
 
-//TODO remove dirty hack
-#define eas_reset_address()				\
-	({						\
-		eas_set_address(EAS_ADDR_UNDEF);	\
-		eas_set_address(EAS_ADDR_UNDEF);	\
-	 })
+#define eas_reset_address() ({eas_set_address(EAS_ADDR_UNDEF);})
 
 static bool eas_initialized = false;
 
@@ -48,7 +46,8 @@ eas_init(void)
 	// Set address port to output
 	EAS_ADDR_DIR = 0xFF;
 	// Set address select to output
-	bit_set(EAS_DIR, EAS_AS);
+	bit_set(EAS_DIR, EAS_AS_HI);
+	bit_set(EAS_DIR, EAS_AS_LO);
 	// Set data out to output
 	bit_set(EAS_DIR, EAS_DOUT);
 
