@@ -72,16 +72,8 @@ static void *operators_pult_handler_args = NULL;
 
 ISR(INT1_vect)
 {
-	eas_write_bit(EAS_ADDR_READY, true);
-
 	if (operators_pult_handler) {
 		operators_pult_handler(operators_pult_handler_args);
-	}
-
-	if (!bit_get(ACSR, ACO)) {
-		// Back to sleep if power is still low
-		eas_write_bit(EAS_ADDR_READY, false);
-		sleep_cpu();
 	}
 }
 

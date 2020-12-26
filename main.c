@@ -113,6 +113,8 @@ main(void)
 	eintr_set_operators_pult_handler(operators_pult_handler, &oph_args);
 
 	for(;;) {
+		eas_write_bit(EAS_ADDR_READY, true);
+
 		// DEBUG: reading is in progress
 		eas_write_bit(EAS_ADDR_DEBUG, true);
 
