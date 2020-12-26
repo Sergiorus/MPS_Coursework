@@ -34,8 +34,6 @@ eas_set_address(uint16_t addr)
 	_delay_ms(1);
 }
 
-#define eas_reset_address() ({eas_set_address(EAS_ADDR_UNDEF);})
-
 static bool eas_initialized = false;
 
 void
@@ -56,8 +54,6 @@ eas_init(void)
 	// Enable pull up
 	bit_set(EAS_PORT, EAS_DIN);
 
-	eas_reset_address();
-
 	eas_initialized = true;
 }
 
@@ -66,7 +62,6 @@ eas_read_bit(uint16_t addr)
 {
 	eas_set_address(addr);
 	bool b = bit_get(EAS_PIN, EAS_DIN);
-	eas_reset_address();
 	return b;
 }
 
@@ -75,7 +70,6 @@ eas_write_bit(uint16_t addr, bool bit)
 {
 	bit_def(EAS_PORT, EAS_DOUT, bit);
 	eas_set_address(addr);
-	eas_reset_address();
 }
 
 byte_t
@@ -83,6 +77,5 @@ eas_read_analog(uint16_t addr)
 {
 	eas_set_address(addr);
 	byte_t b = adc_read_byte();
-	eas_reset_address();
 	return b;
 }
