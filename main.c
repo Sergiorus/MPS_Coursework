@@ -108,6 +108,9 @@ main(void)
 			&operators_pult_handler_args);
 
 	for(;;) {
+		// DEBUG: reading is in progress
+		eas_write_bit(EAS_ADDR_DEBUG, true);
+
 		x1 = !eas_read_bit(EAS_ADDR_X1);
 		x2 = !eas_read_bit(EAS_ADDR_X2);
 		x3 = !eas_read_bit(EAS_ADDR_X3);
@@ -126,6 +129,9 @@ main(void)
 		bit_def(N3, 5, !eas_read_bit(EAS_ADDR_SW5));
 		bit_def(N3, 6, !eas_read_bit(EAS_ADDR_SW6));
 		bit_def(N3, 7, !eas_read_bit(EAS_ADDR_SW7));
+
+		// DEBUG: reading finished
+		eas_write_bit(EAS_ADDR_DEBUG, false);
 
 		if (f_val)
 			eas_write_bit(EAS_ADDR_LED1, true); // LED1 turn on
