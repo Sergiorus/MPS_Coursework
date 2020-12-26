@@ -6,6 +6,8 @@
 
 #include "byte.h"
 
+#define EAS_ADDR_UNDEF	0x000F
+
 #define EAS_ADDR_X1	0x0000
 #define EAS_ADDR_X2	0x0001
 #define EAS_ADDR_X3	0x0002
