@@ -24,7 +24,8 @@
 #define EAS_ADDR_LEDS4	0x000D
 #define EAS_ADDR_LEDS5	0x000E
 
-#define EAS_ADDR_UNDEF	0x000F
+// Debug LED to figure out if reading phase is in progress
+#define EAS_ADDR_DEBUG	0x000F
 
 #define EAS_ADDR_SW0	0x0010
 #define EAS_ADDR_SW1	0x0011
@@ -34,9 +35,6 @@
 #define EAS_ADDR_SW5	0x0015
 #define EAS_ADDR_SW6	0x0016
 #define EAS_ADDR_SW7	0x0017
-
-// Debug LED to figure out if reading phase is in progress
-#define EAS_ADDR_DEBUG	0x0018
 
 void
 eas_init(void);
