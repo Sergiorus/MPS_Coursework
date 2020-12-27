@@ -1,9 +1,9 @@
 #include <assert.h>
 
 #include <avr/io.h>
+#include <util/delay.h>
 
 #include "adc.h"
-#include "time.h"
 
 #include "ext_addr_space.h"
 
@@ -26,12 +26,12 @@ eas_set_address(uint16_t addr)
 	bit_set(EAS_PORT, EAS_AS_HI);
 	EAS_ADDR_PORT = byte_hi(addr);
 	bit_clr(EAS_PORT, EAS_AS_HI);
-	time_delay_ms(2);
+	_delay_ms(1);
 
 	bit_set(EAS_PORT, EAS_AS_LO);
 	EAS_ADDR_PORT = byte_lo(addr);
 	bit_clr(EAS_PORT, EAS_AS_LO);
-	time_delay_ms(2);
+	_delay_ms(1);
 }
 
 #define eas_reset_address() ({eas_set_address(EAS_ADDR_UNDEF);})
