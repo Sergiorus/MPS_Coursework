@@ -5,13 +5,13 @@
 #include <stdbool.h>
 
 #include <avr/interrupt.h>
-#include <util/delay.h>
 
 #include "adc.h"
 #include "ascii.h"
 #include "byte.h"
 #include "ext_intr.h"
 #include "ext_addr_space.h"
+#include "time.h"
 #include "uart.h"
 
 #define N1_validate()	(N1 >= 7 && N1 <= 9)
@@ -82,6 +82,7 @@ main(void)
 {
 	cli(); // Disable global interrupts
 	uart_init(F_CPU, BAUD_RATE);
+	time_init(F_CPU);
 	adc_init();
 	eintr_init();
 	eas_init();
@@ -146,28 +147,28 @@ main(void)
 			eas_write_bit(EAS_ADDR_LED1, true); // LED1 turn on
 		eas_write_bit(EAS_ADDR_LED2, true); // LED2 turn off
 
-		_delay_ms(2000);
+		time_delay_ms(2000);
 
 		if (f_val)
 			eas_write_bit(EAS_ADDR_LED1, false); // LED1 turn off
 		if (NV_val > N3)
 			eas_write_bit(EAS_ADDR_LED2, false); // LED2 turn off
 
-		_delay_ms(2000);
+		time_delay_ms(2000);
 
 		eas_write_bit(EAS_ADDR_LED2, false); // LED2 turn off
 
-		_delay_ms(2000);
+		time_delay_ms(2000);
 
 		if (f_val)
 			eas_write_bit(EAS_ADDR_LED1, true); // LED1 turn on
 
-		_delay_ms(2000);
+		time_delay_ms(2000);
 
 		if (f_val)
 			eas_write_bit(EAS_ADDR_LED1, false); // LED1 turn off
 
-		_delay_ms(4000);
+		time_delay_ms(4000);
 	}
 
 	return 0;

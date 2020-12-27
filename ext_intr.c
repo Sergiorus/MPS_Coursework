@@ -4,10 +4,10 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
-#include <util/delay.h>
 
 #include "byte.h"
 #include "ext_addr_space.h"
+#include "time.h"
 #include "uart.h"
 
 #include "ext_intr.h"
@@ -96,7 +96,7 @@ ISR(ANA_COMP_vect)
 	uart_write_byte('R');
 	uart_write_byte('M');
 
-	_delay_ms(10);
+	time_delay_ms(10);
 
 	eas_write_bit(EAS_ADDR_READY, false);
 	sleep_cpu();
